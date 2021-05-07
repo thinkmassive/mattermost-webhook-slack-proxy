@@ -1,4 +1,4 @@
-A simple Docker image that uses [mitmproxy](https://mitmproxy.org/) to convert Slack "blocks" webhook payloads to the legacy format. This is useful for sending [webhooks to Mattermost](https://docs.mattermost.com/developer/webhooks-incoming.html), which [doesn't yet support the new format](https://mattermost.atlassian.net/browse/MM-26729).
+A simple Docker image that uses [mitmproxy](https://mitmproxy.org/) to convert Slack [block kit](https://api.slack.com/block-kit/building) webhook payloads to the legacy format. This is useful for sending [webhooks to Mattermost](https://docs.mattermost.com/developer/webhooks-incoming.html), which [doesn't yet support the new format](https://mattermost.atlassian.net/browse/MM-26729).
 
 Messages are still susceptible to the limitations described in the Mattermost docs about [Slack Compatibility](https://docs.mattermost.com/developer/webhooks-incoming.html#slack-compatibility).
 
@@ -43,6 +43,14 @@ If you run the proxy in an ad-hoc container, you may want to attach it to an exi
       - 8080:8080
 ```
 
+## Interactive Use
+
+You can exec into the container to experiment with `mitmproxy` and run it in interactive mode.
+
+```bash
+docker-compose exec -- mattermost-proxy /bin/sh
+```
+
 # Kubernetes
 
 I will add a kubernetes manifest soon.
@@ -55,24 +63,18 @@ This initial implementation is extremely simple. It rewrites the payload as a si
 
 The Slack "blocks" message looks like this:
 ```json
-{"blocks": [{
-  "text": {
-    "text": "This is where your chat message goes"
-  }
-}]}
+{
+  "blocks": [
+    {
+      "text": {
+        "text": "This is where your chat message goes"
+      }
+    }
+  ]
+}
 ```
 
 The legacy message looks like this:
 ```json
 {"text": "This is where your chat message goes"}
 ```  
-
-# Interactive Use
-
-You can change the entrypoint to experiment with `mitmproxy` and run it in interactive mode.
-
-```bash
-docker run -it --entrypoint /bin/sh \
-    -p 18080:8080 \
-    thinkmassive/mattermost-webhook-slack-proxy
-```
